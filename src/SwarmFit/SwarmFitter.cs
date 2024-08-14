@@ -89,6 +89,12 @@ public class SwarmFitter
         return ys;
     }
 
+    public void SetRange(int variable, double min, double max)
+    {
+        VariableMin[variable] = min;
+        VariableMax[variable] = max;
+    }
+
     public void Fit(int iterations = 100, int particleCount = 5)
     {
         Stopwatch sw = Stopwatch.StartNew();
