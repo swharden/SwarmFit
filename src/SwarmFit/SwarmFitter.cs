@@ -9,18 +9,37 @@ public class SwarmFitter
 {
     double[] DataXs { get; }
     double[] DataYs { get; }
-    VariableLimits[] VarLimits = [
-        new(-500, 500),
-        new(-1, 1),
-    ];
+    public Func<double, double[], double> Function { get; }
+    VariableLimits[] VarLimits { get; }
 
-    public SwarmFitter(double[] xs, double[] ys)
+    Random Rand = new(0); // TODO: make this settable
+    double VelocityRandomness = 0.1;
+    double InertiaWeight = 0.729;
+    double LocalWeight = 1.49445;
+    double GlobalWeight = 1.49445;
+    double probDeath = 0.01;
+    int NumParticles = 5;
+    int MaxEpochs = 1000;
+
+    public SwarmFitter(double[] xs, double[] ys, Func<double, double[], double> func, VariableLimits[] limits)
     {
         if (xs.Length != ys.Length)
             throw new ArgumentException($"{nameof(xs)} and {nameof(ys)} must have equal length");
 
+        try
+        {
+            double[] testVars = limits.Select(x => x.Mid).ToArray();
+            func.Invoke(xs[0], testVars);
+        }
+        catch (IndexOutOfRangeException)
+        {
+            throw new ArgumentException("Function variable length must equal length of variable limits");
+        }
+
         DataXs = xs;
         DataYs = ys;
+        Function = func;
+        VarLimits = limits;
     }
 
     double Error(double[] vars)
@@ -38,47 +57,34 @@ public class SwarmFitter
         return error;
     }
 
-    public double GetY(double x, double[] vars)
-    {
-        return vars[0] * Math.Exp(vars[1] * x); // A*e^(B*x)
-    }
+    public double GetY(double x, double[] vars) => Function(x, vars);
+    public double[] GetYs(double[] xs, double[] vars) => xs.Select(x => GetY(x, vars)).ToArray();
 
     public double[] Solve()
     {
-        int dim = 2;
-        int numParticles = 5;
-        int maxEpochs = 1000; ;
-        return Solve(dim, numParticles, maxEpochs);
-    }
+        if (Function is null)
+            throw new NullReferenceException(nameof(Function));
 
-    double VelocityRandomness = 0.1;
-    double InertiaWeight = 0.729;
-    double LocalWeight = 1.49445;
-    double GlobalWeight = 1.49445;
-    double probDeath = 0.01;
+        int variableCount = VarLimits.Length;
 
-    public double[] Solve(int dim, int numParticles, int maxEpochs)
-    {
-        Random rnd = new(0); // TODO: make this settable
-
-        Particle[] swarm = new Particle[numParticles];
-        double[] bestGlobalPosition = new double[dim];
+        Particle[] swarm = new Particle[NumParticles];
+        double[] bestGlobalPosition = new double[variableCount];
         double bestGlobalError = double.MaxValue;
 
         for (int i = 0; i < swarm.Length; ++i)
         {
-            double[] randomPosition = new double[dim];
+            double[] randomPosition = new double[variableCount];
             for (int j = 0; j < randomPosition.Length; ++j)
             {
-                randomPosition[j] = VarLimits[j].Random(rnd);
+                randomPosition[j] = VarLimits[j].Random(Rand);
             }
 
             double error = Error(randomPosition);
-            double[] randomVelocity = new double[dim];
+            double[] randomVelocity = new double[variableCount];
 
             for (int j = 0; j < randomVelocity.Length; ++j)
             {
-                randomVelocity[j] = VarLimits[j].Random(rnd) * VelocityRandomness;
+                randomVelocity[j] = VarLimits[j].Random(Rand) * VelocityRandomness;
             }
             swarm[i] = new Particle(randomPosition, error, randomVelocity, randomPosition, error);
 
@@ -89,15 +95,13 @@ public class SwarmFitter
             }
         }
 
-
         int epoch = 0;
 
-        double[] newVelocity = new double[dim];
-        double[] newPosition = new double[dim];
+        double[] newVelocity = new double[variableCount];
+        double[] newPosition = new double[variableCount];
         double newError;
 
-        // main loop
-        while (epoch < maxEpochs)
+        while (epoch < MaxEpochs)
         {
             for (int i = 0; i < swarm.Length; ++i)
             {
@@ -106,8 +110,8 @@ public class SwarmFitter
                 for (int j = 0; j < currP.velocity.Length; ++j)
                 {
                     double inertia = InertiaWeight * currP.velocity[j];
-                    double local = LocalWeight * rnd.NextDouble() * (currP.bestPosition[j] - currP.position[j]);
-                    double global = GlobalWeight * rnd.NextDouble() * (bestGlobalPosition[j] - currP.position[j]);
+                    double local = LocalWeight * Rand.NextDouble() * (currP.bestPosition[j] - currP.position[j]);
+                    double global = GlobalWeight * Rand.NextDouble() * (bestGlobalPosition[j] - currP.position[j]);
                     newVelocity[j] = inertia + local + global;
                 }
 
@@ -135,12 +139,12 @@ public class SwarmFitter
                     bestGlobalError = newError;
                 }
 
-                double die = rnd.NextDouble();
+                double die = Rand.NextDouble();
                 if (die < probDeath)
                 {
                     for (int j = 0; j < currP.position.Length; ++j)
                     {
-                        currP.position[j] = VarLimits[j].Random(rnd);
+                        currP.position[j] = VarLimits[j].Random(Rand);
                     }
                     currP.error = Error(currP.position);
                     currP.position.CopyTo(currP.bestPosition, 0);
@@ -157,7 +161,7 @@ public class SwarmFitter
             ++epoch;
         }
 
-        double[] result = new double[dim];
+        double[] result = new double[variableCount];
         bestGlobalPosition.CopyTo(result, 0);
         return result;
     }

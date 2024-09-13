@@ -44,7 +44,13 @@ public partial class Form1 : Form
 
         double[] xs = [1, 2, 3, 4, 5, 6, 7];
         double[] ys = [258, 183, 127, 89, 65, 48, 35];
-        SwarmFitter fitter = new(Xs, Ys);
+
+        VariableLimits[] variableLimits = [
+            new(-500, 500),
+            new(-1, 1),
+        ];
+
+        SwarmFitter fitter = new(Xs, Ys, StandardFunctions.Exponential2P, variableLimits);
         double[] vars = fitter.Solve();
 
         double x1 = formsPlotData.Plot.Axes.Bottom.Min;
