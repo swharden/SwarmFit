@@ -28,128 +28,54 @@ partial class Form1
     /// </summary>
     private void InitializeComponent()
     {
-        tableLayoutPanel1 = new TableLayoutPanel();
-        tableLayoutPanel2 = new TableLayoutPanel();
-        formsPlotData = new ScottPlot.WinForms.FormsPlot();
-        formsPlotVariables = new ScottPlot.WinForms.FormsPlot();
-        formsPlotProgress = new ScottPlot.WinForms.FormsPlot();
-        btnRandomize = new Button();
-        btnStep = new Button();
-        lblStatus = new Label();
-        tableLayoutPanel1.SuspendLayout();
-        tableLayoutPanel2.SuspendLayout();
+        btnExp2P = new Button();
+        formsPlot1 = new ScottPlot.WinForms.FormsPlot();
+        btnExp3P = new Button();
         SuspendLayout();
         // 
-        // tableLayoutPanel1
+        // btnExp2P
         // 
-        tableLayoutPanel1.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-        tableLayoutPanel1.ColumnCount = 2;
-        tableLayoutPanel1.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50F));
-        tableLayoutPanel1.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50F));
-        tableLayoutPanel1.Controls.Add(tableLayoutPanel2, 1, 0);
-        tableLayoutPanel1.Controls.Add(formsPlotData, 0, 0);
-        tableLayoutPanel1.Location = new Point(12, 48);
-        tableLayoutPanel1.Name = "tableLayoutPanel1";
-        tableLayoutPanel1.RowCount = 1;
-        tableLayoutPanel1.RowStyles.Add(new RowStyle(SizeType.Percent, 50F));
-        tableLayoutPanel1.Size = new Size(964, 409);
-        tableLayoutPanel1.TabIndex = 0;
+        btnExp2P.Location = new Point(12, 12);
+        btnExp2P.Name = "btnExp2P";
+        btnExp2P.Size = new Size(51, 30);
+        btnExp2P.TabIndex = 1;
+        btnExp2P.Text = "2P";
+        btnExp2P.UseVisualStyleBackColor = true;
         // 
-        // tableLayoutPanel2
+        // formsPlot1
         // 
-        tableLayoutPanel2.ColumnCount = 1;
-        tableLayoutPanel2.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50F));
-        tableLayoutPanel2.Controls.Add(formsPlotVariables, 0, 0);
-        tableLayoutPanel2.Controls.Add(formsPlotProgress, 0, 1);
-        tableLayoutPanel2.Dock = DockStyle.Fill;
-        tableLayoutPanel2.Location = new Point(485, 3);
-        tableLayoutPanel2.Name = "tableLayoutPanel2";
-        tableLayoutPanel2.RowCount = 2;
-        tableLayoutPanel2.RowStyles.Add(new RowStyle(SizeType.Percent, 50F));
-        tableLayoutPanel2.RowStyles.Add(new RowStyle(SizeType.Percent, 50F));
-        tableLayoutPanel2.Size = new Size(476, 403);
-        tableLayoutPanel2.TabIndex = 0;
+        formsPlot1.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+        formsPlot1.DisplayScale = 1F;
+        formsPlot1.Location = new Point(12, 48);
+        formsPlot1.Name = "formsPlot1";
+        formsPlot1.Size = new Size(660, 456);
+        formsPlot1.TabIndex = 2;
         // 
-        // formsPlotData
+        // btnExp3P
         // 
-        formsPlotData.DisplayScale = 1F;
-        formsPlotData.Dock = DockStyle.Fill;
-        formsPlotData.Location = new Point(3, 3);
-        formsPlotData.Name = "formsPlotData";
-        formsPlotData.Size = new Size(476, 403);
-        formsPlotData.TabIndex = 1;
-        // 
-        // formsPlotVariables
-        // 
-        formsPlotVariables.DisplayScale = 1F;
-        formsPlotVariables.Dock = DockStyle.Fill;
-        formsPlotVariables.Location = new Point(3, 3);
-        formsPlotVariables.Name = "formsPlotVariables";
-        formsPlotVariables.Size = new Size(470, 195);
-        formsPlotVariables.TabIndex = 0;
-        // 
-        // formsPlotProgress
-        // 
-        formsPlotProgress.DisplayScale = 1F;
-        formsPlotProgress.Dock = DockStyle.Fill;
-        formsPlotProgress.Location = new Point(3, 204);
-        formsPlotProgress.Name = "formsPlotProgress";
-        formsPlotProgress.Size = new Size(470, 196);
-        formsPlotProgress.TabIndex = 1;
-        // 
-        // btnRandomize
-        // 
-        btnRandomize.Location = new Point(12, 12);
-        btnRandomize.Name = "btnRandomize";
-        btnRandomize.Size = new Size(75, 30);
-        btnRandomize.TabIndex = 1;
-        btnRandomize.Text = "Randomize";
-        btnRandomize.UseVisualStyleBackColor = true;
-        // 
-        // btnStep
-        // 
-        btnStep.Location = new Point(93, 12);
-        btnStep.Name = "btnStep";
-        btnStep.Size = new Size(75, 30);
-        btnStep.TabIndex = 2;
-        btnStep.Text = "Step";
-        btnStep.UseVisualStyleBackColor = true;
-        // 
-        // lblStatus
-        // 
-        lblStatus.AutoSize = true;
-        lblStatus.Location = new Point(174, 20);
-        lblStatus.Name = "lblStatus";
-        lblStatus.Size = new Size(38, 15);
-        lblStatus.TabIndex = 3;
-        lblStatus.Text = "label1";
+        btnExp3P.Location = new Point(69, 12);
+        btnExp3P.Name = "btnExp3P";
+        btnExp3P.Size = new Size(51, 30);
+        btnExp3P.TabIndex = 3;
+        btnExp3P.Text = "3P";
+        btnExp3P.UseVisualStyleBackColor = true;
         // 
         // Form1
         // 
         AutoScaleDimensions = new SizeF(7F, 15F);
         AutoScaleMode = AutoScaleMode.Font;
-        ClientSize = new Size(988, 469);
-        Controls.Add(lblStatus);
-        Controls.Add(btnStep);
-        Controls.Add(btnRandomize);
-        Controls.Add(tableLayoutPanel1);
+        ClientSize = new Size(684, 516);
+        Controls.Add(btnExp3P);
+        Controls.Add(btnExp2P);
+        Controls.Add(formsPlot1);
         Name = "Form1";
         StartPosition = FormStartPosition.CenterScreen;
         Text = "SarmFit Demo";
-        tableLayoutPanel1.ResumeLayout(false);
-        tableLayoutPanel2.ResumeLayout(false);
         ResumeLayout(false);
-        PerformLayout();
     }
 
     #endregion
-
-    private TableLayoutPanel tableLayoutPanel1;
-    private TableLayoutPanel tableLayoutPanel2;
-    private ScottPlot.WinForms.FormsPlot formsPlotVariables;
-    private ScottPlot.WinForms.FormsPlot formsPlotProgress;
-    private ScottPlot.WinForms.FormsPlot formsPlotData;
-    private Button btnRandomize;
-    private Button btnStep;
-    private Label lblStatus;
+    private Button btnExp2P;
+    private ScottPlot.WinForms.FormsPlot formsPlot1;
+    private Button btnExp3P;
 }

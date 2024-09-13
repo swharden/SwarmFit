@@ -26,16 +26,6 @@ public class SwarmFitter
         if (xs.Length != ys.Length)
             throw new ArgumentException($"{nameof(xs)} and {nameof(ys)} must have equal length");
 
-        try
-        {
-            double[] testVars = limits.Select(x => x.Mid).ToArray();
-            func.Invoke(xs[0], testVars);
-        }
-        catch (IndexOutOfRangeException)
-        {
-            throw new ArgumentException("Function variable length must equal length of variable limits");
-        }
-
         DataXs = xs;
         DataYs = ys;
         Function = func;
@@ -62,9 +52,6 @@ public class SwarmFitter
 
     public double[] Solve()
     {
-        if (Function is null)
-            throw new NullReferenceException(nameof(Function));
-
         int variableCount = VarLimits.Length;
 
         Particle[] swarm = new Particle[NumParticles];
