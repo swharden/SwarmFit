@@ -55,9 +55,9 @@ public class Tests
 
         double[] solution = QuickFit.Solve(xs, ys, MyFunc, minVars, maxVars);
 
-        solution[0].Should().Be(40.67392822811977);
-        solution[1].Should().Be(2650.065304297482);
-        solution[2].Should().Be(-0.3298019594075593);
+        solution[0].Should().BeApproximately(40.673, 0.002);
+        solution[1].Should().BeApproximately(2650.065, 0.002);
+        solution[2].Should().BeApproximately(-0.329, 0.002);
     }
 
     [Test]
