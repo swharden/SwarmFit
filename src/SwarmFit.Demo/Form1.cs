@@ -45,7 +45,7 @@ public partial class Form1 : Form
             }
         }
 
-        SwarmFitter fitter = new(xs, ys, fitFunc, limits);
+        SwarmFitter fitter = new(xs, ys, fitFunc, limits) { StoreIntermediateSolutions = true };
 
         FitSolution solution = fitter.Solve();
         label1.Text = $"Fit achieved in {solution.Elapsed.TotalMilliseconds:N2} msec after {solution.Iterations:N0} iterations using {solution.Particles:N0} particles";
@@ -80,9 +80,13 @@ public partial class Form1 : Form
 
     void PlotError(FitSolution solution)
     {
-        int[] epochs = Enumerable.Range(1, solution.ErrorHistory.Length).ToArray();
-        double finalError = solution.ErrorHistory.Last();
-        double[] logDeltaError = solution.ErrorHistory.Select(x => x - finalError).Where(x => x > 0).Select(Math.Log10).ToArray();
+        if (solution.History is null)
+            return;
+
+        double[] errors = solution.History.Select(x => x.Error).ToArray();
+        int[] epochs = Enumerable.Range(1, errors.Length).ToArray();
+        double finalError = errors.Last();
+        double[] logDeltaError = errors.Select(x => x - finalError).Where(x => x > 0).Select(Math.Log10).ToArray();
         formsPlot2.Plot.Clear();
         var sp = formsPlot2.Plot.Add.ScatterLine(epochs, logDeltaError);
         sp.LineWidth = 2;

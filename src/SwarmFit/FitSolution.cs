@@ -1,9 +1,10 @@
 ﻿namespace SwarmFit;
 
-public class FitSolution(double[] vars, double[] errors, TimeSpan elapsed, int iterations, int particles)
+public class FitSolution(double[] vars, double error, TimeSpan elapsed, int iterations, int particles, FitSolution[]? history = null)
 {
-    public double[] Variables { get; } = vars;
-    public double[] ErrorHistory { get; } = errors;
+    public double[] Variables { get; } = [.. vars];
+    public double Error { get; } = error;
+    public FitSolution[]? History { get; } = history;
     public TimeSpan Elapsed { get; } = elapsed;
     public int Iterations { get; } = iterations;
     public int Particles { get; } = particles;
