@@ -3,27 +3,30 @@
  * https://visualstudiomagazine.com/Articles/2013/11/01/Particle-Swarm-Optimization.aspx
  */
 
+using System.Diagnostics;
+
 namespace SwarmFit;
 
 public class SwarmFitter
 {
-    double[] DataXs { get; }
-    double[] DataYs { get; }
+    IReadOnlyList<double> DataXs { get; }
+    IReadOnlyList<double> DataYs { get; }
     public Func<double, double[], double> Function { get; }
     VariableLimits[] VarLimits { get; }
 
-    Random Rand = new(0); // TODO: make this settable
-    double VelocityRandomness = 0.1;
-    double InertiaWeight = 0.729;
-    double LocalWeight = 1.49445;
-    double GlobalWeight = 1.49445;
-    double probDeath = 0.01;
-    int NumParticles = 5;
-    int MaxEpochs = 1000;
+    public Random Rand = new(0); // TODO: make this settable
+    public double VelocityRandomness = 0.1;
+    public double InertiaWeight = 0.729;
+    public double LocalWeight = 1.49445;
+    public double GlobalWeight = 1.49445;
+    public double probDeath = 0.01;
+    public int NumParticles = 5;
+    public bool SquareError = false;
+    public int VariableCount => VarLimits.Length;
 
-    public SwarmFitter(double[] xs, double[] ys, Func<double, double[], double> func, VariableLimits[] limits)
+    public SwarmFitter(IReadOnlyList<double> xs, IReadOnlyList<double> ys, Func<double, double[], double> func, VariableLimits[] limits)
     {
-        if (xs.Length != ys.Length)
+        if (xs.Count != ys.Count)
             throw new ArgumentException($"{nameof(xs)} and {nameof(ys)} must have equal length");
 
         DataXs = xs;
@@ -32,16 +35,16 @@ public class SwarmFitter
         VarLimits = limits;
     }
 
-    double Error(double[] vars)
+    double GetError(double[] vars)
     {
         double error = 0;
 
-        for (int i = 0; i < DataXs.Length; i++)
+        for (int i = 0; i < DataXs.Count; i++)
         {
             double predictedY = GetY(DataXs[i], vars);
             double actualY = DataYs[i];
             double diff = Math.Abs(predictedY - actualY);
-            error += diff; // TODO: square this?
+            error += SquareError ? diff * diff : diff;
         }
 
         return error;
@@ -50,106 +53,93 @@ public class SwarmFitter
     public double GetY(double x, double[] vars) => Function(x, vars);
     public double[] GetYs(double[] xs, double[] vars) => xs.Select(x => GetY(x, vars)).ToArray();
 
-    public double[] Solve()
+    public FitSolution Solve(int iterations = 1000)
     {
-        int variableCount = VarLimits.Length;
+        Stopwatch sw = Stopwatch.StartNew();
 
-        Particle[] swarm = new Particle[NumParticles];
-        double[] bestGlobalPosition = new double[variableCount];
+        double[] errorHistory = new double[iterations];
+        double[] bestGlobalPositions = new double[VariableCount];
         double bestGlobalError = double.MaxValue;
 
-        for (int i = 0; i < swarm.Length; ++i)
+        Particle[] particles = new Particle[NumParticles];
+
+        for (int i = 0; i < particles.Length; i++)
         {
-            double[] randomPosition = new double[variableCount];
-            for (int j = 0; j < randomPosition.Length; ++j)
-            {
-                randomPosition[j] = VarLimits[j].Random(Rand);
-            }
+            double[] randomPositions = VarLimits.Select(x => x.Random(Rand)).ToArray();
+            double error = GetError(randomPositions);
+            double[] randomVelocities = VarLimits.Select(x => x.Random(Rand) * VelocityRandomness).ToArray();
+            particles[i] = new Particle(randomPositions, error, randomVelocities, randomPositions, error);
 
-            double error = Error(randomPosition);
-            double[] randomVelocity = new double[variableCount];
-
-            for (int j = 0; j < randomVelocity.Length; ++j)
+            if (particles[i].Error < bestGlobalError)
             {
-                randomVelocity[j] = VarLimits[j].Random(Rand) * VelocityRandomness;
-            }
-            swarm[i] = new Particle(randomPosition, error, randomVelocity, randomPosition, error);
-
-            if (swarm[i].error < bestGlobalError)
-            {
-                bestGlobalError = swarm[i].error;
-                swarm[i].position.CopyTo(bestGlobalPosition, 0);
+                bestGlobalError = particles[i].Error;
+                particles[i].Positions.CopyTo(bestGlobalPositions, 0);
             }
         }
 
-        int epoch = 0;
-
-        double[] newVelocity = new double[variableCount];
-        double[] newPosition = new double[variableCount];
-        double newError;
-
-        while (epoch < MaxEpochs)
+        for (int iteration = 0; iteration < iterations; iteration++)
         {
-            for (int i = 0; i < swarm.Length; ++i)
-            {
-                Particle currP = swarm[i];
+            double[] newVelocity = new double[VariableCount];
+            double[] newPosition = new double[VariableCount];
 
-                for (int j = 0; j < currP.velocity.Length; ++j)
+            foreach (Particle particle in particles)
+            {
+                for (int j = 0; j < particle.Velocities.Length; j++)
                 {
-                    double inertia = InertiaWeight * currP.velocity[j];
-                    double local = LocalWeight * Rand.NextDouble() * (currP.bestPosition[j] - currP.position[j]);
-                    double global = GlobalWeight * Rand.NextDouble() * (bestGlobalPosition[j] - currP.position[j]);
+                    double inertia = InertiaWeight * particle.Velocities[j];
+                    double local = LocalWeight * Rand.NextDouble() * (particle.BestPositions[j] - particle.Positions[j]);
+                    double global = GlobalWeight * Rand.NextDouble() * (bestGlobalPositions[j] - particle.Positions[j]);
                     newVelocity[j] = inertia + local + global;
                 }
 
-                newVelocity.CopyTo(currP.velocity, 0);
+                newVelocity.CopyTo(particle.Velocities, 0);
 
-                for (int j = 0; j < currP.position.Length; ++j)
+                for (int j = 0; j < particle.Positions.Length; j++)
                 {
-                    newPosition[j] = currP.position[j] + newVelocity[j];
+                    newPosition[j] = particle.Positions[j] + newVelocity[j];
                     newPosition[j] = VarLimits[j].Clamp(newPosition[j]);
                 }
-                newPosition.CopyTo(currP.position, 0);
+                newPosition.CopyTo(particle.Positions, 0);
 
-                newError = Error(newPosition);
-                currP.error = newError;
+                double newError = GetError(newPosition);
+                particle.Error = newError;
 
-                if (newError < currP.bestError)
+                if (newError < particle.BestError)
                 {
-                    newPosition.CopyTo(currP.bestPosition, 0);
-                    currP.bestError = newError;
+                    newPosition.CopyTo(particle.BestPositions, 0);
+                    particle.BestError = newError;
                 }
 
                 if (newError < bestGlobalError)
                 {
-                    newPosition.CopyTo(bestGlobalPosition, 0);
+                    newPosition.CopyTo(bestGlobalPositions, 0);
                     bestGlobalError = newError;
                 }
 
-                double die = Rand.NextDouble();
-                if (die < probDeath)
+                if (Rand.NextDouble() < probDeath)
                 {
-                    for (int j = 0; j < currP.position.Length; ++j)
-                    {
-                        currP.position[j] = VarLimits[j].Random(Rand);
-                    }
-                    currP.error = Error(currP.position);
-                    currP.position.CopyTo(currP.bestPosition, 0);
-                    currP.bestError = currP.error;
+                    particle.RandomizePositions(Rand, VarLimits);
+                    particle.Error = GetError(particle.Positions);
+                    particle.BestError = particle.Error;
 
-                    if (currP.error < bestGlobalError)
+                    if (particle.Error < bestGlobalError)
                     {
-                        bestGlobalError = currP.error;
-                        currP.position.CopyTo(bestGlobalPosition, 0);
+                        bestGlobalError = particle.Error;
+                        particle.Positions.CopyTo(bestGlobalPositions, 0);
                     }
                 }
-
             }
-            ++epoch;
+
+            errorHistory[iteration] = bestGlobalError;
         }
 
-        double[] result = new double[variableCount];
-        bestGlobalPosition.CopyTo(result, 0);
-        return result;
+        return new FitSolution()
+        {
+            Variables = bestGlobalPositions,
+            ErrorHistory = errorHistory,
+            Elapsed = sw.Elapsed,
+            Iterations = iterations,
+            Particles = NumParticles,
+        };
     }
 }
