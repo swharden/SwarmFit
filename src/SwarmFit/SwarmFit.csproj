@@ -5,6 +5,36 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <langversion>12</langversion>
+        <PackageId>SwarmFit</PackageId>
+        <Version>0.0.1</Version>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <Authors>Scott Harden</Authors>
+        <Company>Harden Technologies, LLC</Company>
+        <Copyright>Copyright 2024 (c) Scott Harden / Harden Technologies, LLC</Copyright>
+        <Description>A .NET standard library for fitting curves to data using particle swarm optimization</Description>
+        <PackageTags>curve fit fitting curve-fit curve-fitting math equation function</PackageTags>
+        <PackageProjectUrl>https://github.com/swharden/SwarmFit</PackageProjectUrl>
+        <RepositoryUrl>https://github.com/swharden/SwarmFit.git</RepositoryUrl>
+        <RepositoryType>git</RepositoryType>
+        <PackageIcon>icon.png</PackageIcon>
+        <PackageReadmeFile>readme.md</PackageReadmeFile>
+        <IncludeSymbols>true</IncludeSymbols>
+        <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+        <PublishRepositoryUrl>true</PublishRepositoryUrl>
+        <EmbedUntrackedSources>true</EmbedUntrackedSources>
+        <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
     </PropertyGroup>
+
+    <ItemGroup>
+        <None Include="icon.png" Pack="true" PackagePath="\icon.png" />
+        <None Include="nuget-readme.md" Pack="true" PackagePath="\readme.md" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+    </ItemGroup>
 
 </Project>
