@@ -48,13 +48,43 @@ public class Tests
                111.096794, 94.25109, 81.55578, 71.30187,
                62.146603, 54.212032, 49.20715, 46.765743];
 
-        Func<double, double[], double> func = StandardFunctions.Exponential3P;
-        double[] minVars = [-5000, -10, -100];
-        double[] maxVars = [5000, 10, 100];
-        double[] solution = QuickFit.Solve(xs, ys, func, minVars, maxVars);
+        static double MyFunc(double x, double[] vars) => vars[0] + vars[1] * Math.Exp(vars[2] * x); // Y = A + B * e^(x*C)
 
-        solution[0].Should().Be(2606.6074457530053);
-        solution[1].Should().Be(-0.32811539608184037);
-        solution[2].Should().Be(40.53170947533161);
+        double[] minVars = [-100, -5000, -10];
+        double[] maxVars = [100, 5000, 10];
+
+        double[] solution = QuickFit.Solve(xs, ys, MyFunc, minVars, maxVars);
+
+        solution[0].Should().Be(40.67392822811977);
+        solution[1].Should().Be(2650.065304297482);
+        solution[2].Should().Be(-0.3298019594075593);
+    }
+
+    [Test]
+    public void Test_Fit_Quickstart()
+    {
+        // data points to fit
+        double[] xs = [1, 2, 3, 4, 5];
+        double[] ys = [304, 229, 174, 134, 111];
+
+        // define a fit function using any number of variables.
+        static double MyFunc(double x, double[] vars)
+        {
+            // Y = A + B * e^(x*C)
+            return vars[0] + vars[1] * Math.Exp(vars[2] * x);
+        }
+
+        // define the minimum and maximum value for each variable
+        double[] minVars = [-100, -5000, -10];
+        double[] maxVars = [100, 5000, 10];
+
+        // perform the fit
+        double[] solution = QuickFit.Solve(xs, ys, MyFunc, minVars, maxVars);
+
+        // display the solution
+        double a = solution[0];
+        double b = solution[1];
+        double c = solution[2];
+        Console.WriteLine($"Y = {a:N2} + {b:N2} * e^(x * {c:N2})");
     }
 }
