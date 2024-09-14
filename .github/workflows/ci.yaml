@@ -3,6 +3,7 @@ name: CI
 on:
   workflow_dispatch:
   push:
+  pull_request:
 
 jobs:
   build:
@@ -23,3 +24,11 @@ jobs:
         run: dotnet pack ./src/SwarmFit/ -o packages
       - name: Validate Packages
         run: dotnet validate package local ./packages/*.nupkg
+      - name: Setup NuGet
+        if: github.ref == 'refs/heads/main'
+        uses: nuget/setup-nuget@v2
+        with:
+          nuget-api-key: ${{ secrets.NUGET_API_KEY }}
+      - name: Deploy NuGet Packages
+        if: github.ref == 'refs/heads/main'
+        run: nuget push packages/*.nupkg -SkipDuplicate -Source https://api.nuget.org/v3/index.json
