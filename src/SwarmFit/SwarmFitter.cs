@@ -9,8 +9,8 @@ namespace SwarmFit;
 
 public class SwarmFitter
 {
-    IReadOnlyList<double> DataXs { get; }
-    IReadOnlyList<double> DataYs { get; }
+    public double[] Xs { get; }
+    public double[] Ys { get; }
     public Func<double, double[], double> Function { get; }
     VariableLimits[] VarLimits { get; }
 
@@ -24,13 +24,13 @@ public class SwarmFitter
     public bool SquareError = false;
     public int VariableCount => VarLimits.Length;
 
-    public SwarmFitter(IReadOnlyList<double> xs, IReadOnlyList<double> ys, Func<double, double[], double> func, VariableLimits[] limits)
+    public SwarmFitter(double[] xs, double[] ys, Func<double, double[], double> func, VariableLimits[] limits)
     {
-        if (xs.Count != ys.Count)
+        if (xs.Length != ys.Length)
             throw new ArgumentException($"{nameof(xs)} and {nameof(ys)} must have equal length");
 
-        DataXs = xs;
-        DataYs = ys;
+        Xs = xs;
+        Ys = ys;
         Function = func;
         VarLimits = limits;
     }
@@ -39,10 +39,10 @@ public class SwarmFitter
     {
         double error = 0;
 
-        for (int i = 0; i < DataXs.Count; i++)
+        for (int i = 0; i < Xs.Length; i++)
         {
-            double predictedY = GetY(DataXs[i], vars);
-            double actualY = DataYs[i];
+            double predictedY = GetY(Xs[i], vars);
+            double actualY = Ys[i];
             double diff = Math.Abs(predictedY - actualY);
             error += SquareError ? diff * diff : diff;
         }
