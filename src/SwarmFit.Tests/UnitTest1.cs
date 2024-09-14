@@ -1,3 +1,4 @@
+using FluentAssertions;
 using ScottPlot;
 
 namespace SwarmFit.Tests;
@@ -5,47 +6,25 @@ namespace SwarmFit.Tests;
 public class Tests
 {
     [Test]
-    public void Test_Fit()
-    {
-        double[] xs = SampleData.Range(0, 2, .1);
-        double[] ys = SampleData.Exponential(xs, 5, 3, 2);
-
-        SwarmFitter fitter = new(xs, ys, 3);
-        fitter.Fit(1000);
-        Console.WriteLine($"Fit achieved in {fitter.Elapsed.TotalMilliseconds} ms");
-        Console.WriteLine(fitter);
-
-        Plot plot = new();
-        plot.Add.Markers(xs, ys);
-        plot.Add.ScatterLine(xs, fitter.GetYs(xs));
-
-        var saved = plot.SavePng("test.png", 400, 300);
-        Console.WriteLine(saved);
-        //saved.LaunchInBrowser();
-    }
-
-    [Test]
     public void Test_Logo()
     {
-        double[] xs = Generate.Consecutive(12, 1, 7);
+        double[] xs = [7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18];
         double[] ys = [304.08994, 229.13878, 173.71886, 135.75499,
                111.096794, 94.25109, 81.55578, 71.30187,
                62.146603, 54.212032, 49.20715, 46.765743];
 
-        SwarmFitter fitter = new(xs, ys, 3);
-        fitter.SetRange(0, 0, 100);
-        fitter.SetRange(1, 0, 5000);
-        fitter.SetRange(2, -10, 10);
+        Func<double, double[], double> func = StandardFunctions.Exponential3P;
+        VariableLimits[] limits = [new(-5000, 5000), new(-100, 100), new(-100, 100)];
+        SwarmFitter fitter = new(xs, ys, func, limits);
+        FitSolution solution = fitter.Solve(10_000);
 
-        fitter.Fit(10_000);
-        Console.WriteLine($"Fit achieved in {fitter.Elapsed.TotalMilliseconds} ms");
-        Console.WriteLine(fitter);
+        double[] fitYs = xs.Select(x => func.Invoke(x, solution.Variables)).ToArray();
 
         Plot plot = new();
         var data = plot.Add.Markers(xs, ys);
         data.LegendText = "Data Points";
 
-        var fit = plot.Add.ScatterLine(xs, fitter.GetYs(xs));
+        var fit = plot.Add.ScatterLine(xs, fitYs);
         fit.LegendText = "Fitted Curve";
         fit.LineWidth = 2;
         fit.LinePattern = LinePattern.DenselyDashed;
@@ -53,12 +32,29 @@ public class Tests
 
         plot.Legend.Alignment = Alignment.UpperRight;
 
-        plot.Title($"Y = {fitter.Solution[0]:0.00} + {fitter.Solution[1]:0.00} * e^({fitter.Solution[2]:0.00} * x)");
+        plot.Title($"Y = {solution.Variables[2]:0.00} + {solution.Variables[0]:0.00} * e^({solution.Variables[1]:0.00} * x)");
         plot.Axes.Title.Label.Bold = false;
-        //plot.Axes.Title.Label.FontName = ScottPlot.Fonts.Serif;
 
         var saved = plot.SavePng("test.png", 400, 300);
         Console.WriteLine(saved);
         //saved.LaunchInBrowser();
+    }
+
+    [Test]
+    public void Test_Fit_Values()
+    {
+        double[] xs = [7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18];
+        double[] ys = [304.08994, 229.13878, 173.71886, 135.75499,
+               111.096794, 94.25109, 81.55578, 71.30187,
+               62.146603, 54.212032, 49.20715, 46.765743];
+
+        Func<double, double[], double> func = StandardFunctions.Exponential3P;
+        double[] minVars = [-5000, -10, -100];
+        double[] maxVars = [5000, 10, 100];
+        double[] solution = QuickFit.Solve(xs, ys, func, minVars, maxVars);
+
+        solution[0].Should().Be(2606.6074457530053);
+        solution[1].Should().Be(-0.32811539608184037);
+        solution[2].Should().Be(40.53170947533161);
     }
 }
