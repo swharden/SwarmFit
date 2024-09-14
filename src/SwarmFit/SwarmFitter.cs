@@ -133,13 +133,6 @@ public class SwarmFitter
             errorHistory[iteration] = bestGlobalError;
         }
 
-        return new FitSolution()
-        {
-            Variables = bestGlobalPositions,
-            ErrorHistory = errorHistory,
-            Elapsed = sw.Elapsed,
-            Iterations = iterations,
-            Particles = NumParticles,
-        };
+        return new FitSolution(bestGlobalPositions, errorHistory, sw.Elapsed, iterations, particles.Length);
     }
 }
