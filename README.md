@@ -1,5 +1,7 @@
 # SwarmFit
 
+[![CI](https://github.com/swharden/SwarmFit/actions/workflows/ci.yaml/badge.svg)](https://github.com/swharden/SwarmFit/actions/workflows/ci.yaml)
+
 **SwarmFit is a .NET package for fitting curves to X/Y data** points using [particle swarm optimization](https://en.wikipedia.org/wiki/Particle_swarm_optimization). Unlike other gradient decent strategies, finding the derivative of the error function is not required. SwarmFit can be used to calculate best fit curves for arbitrary equations that use any number of variables.
 
 ![](dev/example1.png)
