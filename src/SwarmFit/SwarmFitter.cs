@@ -23,6 +23,7 @@ public class SwarmFitter
     public int NumParticles = 5;
     public bool SquareError = false;
     public int VariableCount => VarLimits.Length;
+    public bool StoreIntermediateSolutions = false;
 
     public SwarmFitter(double[] xs, double[] ys, Func<double, double[], double> func, VariableLimits[] limits)
     {
@@ -57,11 +58,11 @@ public class SwarmFitter
     {
         Stopwatch sw = Stopwatch.StartNew();
 
-        double[] errorHistory = new double[iterations];
         double[] bestGlobalPositions = new double[VariableCount];
         double bestGlobalError = double.MaxValue;
 
         Particle[] particles = new Particle[NumParticles];
+        List<FitSolution> intermediateSolutions = [];
 
         for (int i = 0; i < particles.Length; i++)
         {
@@ -77,7 +78,12 @@ public class SwarmFitter
             }
         }
 
-        for (int iteration = 0; iteration < iterations; iteration++)
+        if (StoreIntermediateSolutions)
+        {
+            intermediateSolutions.Add(new(bestGlobalPositions, bestGlobalError, sw.Elapsed, 0, particles.Length));
+        }
+
+        for (int iteration = 1; iteration <= iterations; iteration++)
         {
             double[] newVelocity = new double[VariableCount];
             double[] newPosition = new double[VariableCount];
@@ -114,6 +120,7 @@ public class SwarmFitter
                 {
                     newPosition.CopyTo(bestGlobalPositions, 0);
                     bestGlobalError = newError;
+                    intermediateSolutions.Add(new(bestGlobalPositions, bestGlobalError, sw.Elapsed, iteration, particles.Length));
                 }
 
                 if (Rand.NextDouble() < probDeath)
@@ -126,13 +133,12 @@ public class SwarmFitter
                     {
                         bestGlobalError = particle.Error;
                         particle.Positions.CopyTo(bestGlobalPositions, 0);
+                        intermediateSolutions.Add(new(bestGlobalPositions, bestGlobalError, sw.Elapsed, iteration, particles.Length));
                     }
                 }
             }
-
-            errorHistory[iteration] = bestGlobalError;
         }
 
-        return new FitSolution(bestGlobalPositions, errorHistory, sw.Elapsed, iterations, particles.Length);
+        return new FitSolution(bestGlobalPositions, bestGlobalError, sw.Elapsed, iterations, particles.Length, intermediateSolutions.Any() ? [.. intermediateSolutions] : null);
     }
 }
