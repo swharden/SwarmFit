@@ -6,7 +6,7 @@
         <Nullable>enable</Nullable>
         <langversion>12</langversion>
         <PackageId>SwarmFit</PackageId>
-        <Version>0.0.1</Version>
+        <Version>0.0.2</Version>
         <PackageLicenseExpression>MIT</PackageLicenseExpression>
         <Authors>Scott Harden</Authors>
         <Company>Harden Technologies, LLC</Company>
