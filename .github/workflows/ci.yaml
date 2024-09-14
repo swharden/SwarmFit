@@ -2,7 +2,6 @@ name: CI
 
 on:
   workflow_dispatch:
-  pull_request:
   push:
 
 jobs:
@@ -12,9 +11,15 @@ jobs:
       - uses: actions/checkout@v4
       - name: Setup dotnet
         uses: actions/setup-dotnet@v3
+      - name: Setup Validator
+        run: dotnet tool install --global dotnet-validate --version 0.0.1-preview.304
       - name: Restore
         run: dotnet restore ./src
       - name: Build
         run: dotnet build ./src
       - name: Test
         run: dotnet test ./src
+      - name: Pack
+        run: dotnet pack ./src/SwarmFit/ -o packages
+      - name: Validate Packages
+        run: dotnet validate package local ./packages/*.nupkg
