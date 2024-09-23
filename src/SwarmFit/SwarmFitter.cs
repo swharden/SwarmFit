@@ -15,7 +15,9 @@ public class SwarmFitter
     public Func<double, double[], double> Function { get; }
     VariableLimits[] VarLimits { get; }
 
-    public Random Rand = new(); // TODO: make this settable
+    // Consider using seed-less constructor which picks faster implementation
+    // or providing a custom RNG - this is the hottest part of the algorithm.
+    public Random Rand = new(0); // TODO: make this settable
     public double VelocityRandomness = 0.1;
     public double InertiaWeight = 0.729;
     public double LocalWeight = 1.49445;

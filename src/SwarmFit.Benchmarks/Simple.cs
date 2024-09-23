@@ -24,7 +24,7 @@ public class Simple
         double[] maxVars = [100, 5000, 10];
 
         // perform the fit
-        double[] solution = QuickFit.Solve(xs, ys, Fit, minVars, maxVars, iterations: 10_000);
+        double[] solution = QuickFit.Solve(xs, ys, Fit, minVars, maxVars);
 
         // display the solution
         double a = solution[0];
