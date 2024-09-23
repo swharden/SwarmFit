@@ -1,6 +1,6 @@
 ﻿namespace SwarmFit;
 
-public class Particle
+public struct Particle
 {
     public double[] Positions;
     public double[] BestPositions;
@@ -21,12 +21,13 @@ public class Particle
         BestError = bestErr;
     }
 
-    public void RandomizePositions(Random rand, VariableLimits[] limits)
+    public readonly void RandomizePositions(Random rand, VariableLimits[] limits)
     {
-        for (int i = 0; i < Positions.Length; i++)
+        double[] positions = Positions;
+        for (int i = 0; i < positions.Length; i++)
         {
-            Positions[i] = limits[i].Random(rand);
+            positions[i] = limits[i].Random(rand);
         }
-        Positions.CopyTo(BestPositions, 0);
+        positions.AsSpan().CopyTo(BestPositions);
     }
 }

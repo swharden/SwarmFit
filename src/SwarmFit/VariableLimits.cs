@@ -1,4 +1,6 @@
-﻿namespace SwarmFit;
+﻿using System.Runtime.CompilerServices;
+
+namespace SwarmFit;
 
 public readonly struct VariableLimits(double min, double max)
 {
@@ -8,6 +10,7 @@ public readonly struct VariableLimits(double min, double max)
     public double Span => Max - Min;
     public double Random(Random rand) => Span * rand.NextDouble() + Min;
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public double Clamp(double value)
     {
         if (value < Min) return Min;

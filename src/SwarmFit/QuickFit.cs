@@ -16,7 +16,7 @@ public static class QuickFit
 
         SwarmFitter fit = new(xs, ys, func, limits)
         {
-            NumParticles = 100
+            NumParticles = particles
         };
 
         return fit.Solve(iterations).Variables;
