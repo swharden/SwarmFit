@@ -5,6 +5,7 @@ namespace SwarmFit.Tests;
 
 public class Animation
 {
+    [Ignore("only used for creating graphics for the website")]
     [Test]
     public void Test_Fit_Rainbow()
     {
@@ -64,6 +65,7 @@ public class Animation
         Console.WriteLine(solution);
     }
 
+    [Ignore("only used for creating graphics for the website")]
     [Test]
     public void Test_Fit_Animation()
     {
