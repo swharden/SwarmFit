@@ -11,21 +11,21 @@ public partial class Form1 : Form
         btnExp2P.Click += (s, e) =>
         {
             Func<double, double[], double> fitFunc = StandardFunctions.Exponential2P;
-            VariableLimits[] limits = [new(-500, 500), new(-1, 1)];
+            ParameterLimits[] limits = [new(-500, 500), new(-1, 1)];
             Fit(fitFunc, limits);
         };
 
         btnExp3P.Click += (s, e) =>
         {
             Func<double, double[], double> fitFunc = StandardFunctions.Exponential3P;
-            VariableLimits[] limits = [new(-500, 500), new(-1, 1), new(-100, 100)];
+            ParameterLimits[] limits = [new(-500, 500), new(-1, 1), new(-100, 100)];
             Fit(fitFunc, limits);
         };
 
         Load += (s, e) => btnExp2P.PerformClick();
     }
 
-    void Fit(Func<double, double[], double> fitFunc, VariableLimits[] limits)
+    void Fit(Func<double, double[], double> fitFunc, ParameterLimits[] limits)
     {
         double[] vars = limits.Select(x => x.Random(Random.Shared)).ToArray();
         double[] xs = ScottPlot.Generate.RandomSample(10, 0, 10);
@@ -68,7 +68,7 @@ public partial class Form1 : Form
         double fitXMin = formsPlot1.Plot.Axes.Bottom.Min;
         double fitXMax = formsPlot1.Plot.Axes.Bottom.Max;
         double[] fitXs = Generate.Range(fitXMin, fitXMax, (fitXMax - fitXMin) / 100);
-        double[] fitYs = fitXs.Select(x => fitFunc.Invoke(x, solution.Variables)).ToArray();
+        double[] fitYs = fitXs.Select(x => fitFunc.Invoke(x, solution.Parameters)).ToArray();
 
         var sl = formsPlot1.Plot.Add.ScatterLine(fitXs, fitYs);
         sl.LineWidth = 2;

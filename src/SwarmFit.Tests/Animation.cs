@@ -5,6 +5,7 @@ namespace SwarmFit.Tests;
 
 public class Animation
 {
+    [Ignore("only used for creating graphics for the website")]
     [Test]
     public void Test_Fit_Rainbow()
     {
@@ -17,7 +18,7 @@ public class Animation
             return vars[0] + vars[1] * Math.Exp(x * vars[2]);
         }
 
-        VariableLimits[] limits = [
+        ParameterLimits[] limits = [
             new(0, 500),
             new(0, 2000),
             new (-10, 10)
@@ -28,9 +29,9 @@ public class Animation
         FitSolution solution = fit.Solve();
 
         Plot plot = new();
-        double a = solution.Variables[0];
-        double b = solution.Variables[1];
-        double c = solution.Variables[2];
+        double a = solution.Parameters[0];
+        double b = solution.Parameters[1];
+        double c = solution.Parameters[2];
         string formula = $"Y = {a:N2} + {b:N2} * e^(x * {c:N2})";
         plot.Title(formula);
 
@@ -43,7 +44,7 @@ public class Animation
         plot.Axes.AutoScale();
         plot.Axes.ZoomOut(1.5, 1.5);
         double[] fitXs = Generate.Range(plot.Axes.Bottom.Range.Min, plot.Axes.Bottom.Range.Max, plot.Axes.Bottom.Range.Span / 100);
-        double[] fitYs = fitXs.Select(x => MyFunc(x, solution.Variables)).ToArray();
+        double[] fitYs = fitXs.Select(x => MyFunc(x, solution.Parameters)).ToArray();
 
         if (solution.History is not null)
         {
@@ -52,7 +53,7 @@ public class Animation
             {
                 FitSolution intermediateSolution = solution.History[i];
                 Console.WriteLine(intermediateSolution);
-                double[] tempYs = fitXs.Select(x => MyFunc(x, intermediateSolution.Variables)).ToArray();
+                double[] tempYs = fitXs.Select(x => MyFunc(x, intermediateSolution.Parameters)).ToArray();
                 var tempLine = plot.Add.ScatterLine(fitXs, tempYs);
                 tempLine.Color = cmap.GetColor(i, solution.History.Length).WithAlpha(.5);
                 tempLine.LineWidth = 2;
@@ -64,6 +65,7 @@ public class Animation
         Console.WriteLine(solution);
     }
 
+    [Ignore("only used for creating graphics for the website")]
     [Test]
     public void Test_Fit_Animation()
     {
@@ -76,7 +78,7 @@ public class Animation
             return vars[0] + vars[1] * Math.Exp(x * vars[2]);
         }
 
-        VariableLimits[] limits = [
+        ParameterLimits[] limits = [
             new(0, 500),
             new(0, 2000),
             new (-10, 10)
@@ -112,14 +114,14 @@ public class Animation
 
                 FitSolution intermediateSolution = solution.History[i];
                 Console.WriteLine(intermediateSolution);
-                double[] tempYs = fitXs.Select(x => MyFunc(x, intermediateSolution.Variables)).ToArray();
+                double[] tempYs = fitXs.Select(x => MyFunc(x, intermediateSolution.Parameters)).ToArray();
                 var tempLine = plot.Add.ScatterLine(fitXs, tempYs);
                 tempLine.Color = cmap.GetColor(i, solution.History.Length).WithAlpha(.8);
                 tempLine.LineWidth = 4;
 
-                double a = intermediateSolution.Variables[0];
-                double b = intermediateSolution.Variables[1];
-                double c = intermediateSolution.Variables[2];
+                double a = intermediateSolution.Parameters[0];
+                double b = intermediateSolution.Parameters[1];
+                double c = intermediateSolution.Parameters[2];
                 string formula = $"Y = {a:N2} + {b:N2} * e^(x * {c:N2})";
                 plot.Title(formula);
 
