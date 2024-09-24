@@ -23,7 +23,6 @@ public class SwarmFitter
     public double probDeath = 0.01;
     public int NumParticles = 5;
     public int ParameterCount => ParLimits.Length;
-    public bool StoreIntermediateSolutions = false;
 
     public SwarmFitter(double[] xs, double[] ys, Func<double, double[], double> func, ParameterLimits[] limits)
     {
@@ -65,7 +64,6 @@ public class SwarmFitter
         double bestGlobalError = double.MaxValue;
 
         Span<Particle> particles = new Particle[NumParticles];
-        List<FitSolution>? intermediateSolutions = StoreIntermediateSolutions ? [] : null;
 
         for (int i = 0; i < particles.Length; i++)
         {
@@ -80,8 +78,6 @@ public class SwarmFitter
                 particles[i].Positions.AsSpan().CopyTo(bestGlobalPositions);
             }
         }
-
-        intermediateSolutions?.Add(new(bestGlobalPositions, bestGlobalError, sw.Elapsed, 0, particles.Length));
 
         double[] newVelocity = new double[ParameterCount];
         double[] newPosition = new double[ParameterCount];
@@ -124,7 +120,6 @@ public class SwarmFitter
                 {
                     newPosition.AsSpan().CopyTo(bestGlobalPositions);
                     bestGlobalError = newError;
-                    intermediateSolutions?.Add(new(bestGlobalPositions, bestGlobalError, sw.Elapsed, iteration, particles.Length));
                 }
 
                 // TODO: never kill the best performing particle. Maybe only kill the worst particle?
@@ -138,12 +133,11 @@ public class SwarmFitter
                     {
                         bestGlobalError = particle.Error;
                         positions.AsSpan().CopyTo(bestGlobalPositions);
-                        intermediateSolutions?.Add(new(bestGlobalPositions, bestGlobalError, sw.Elapsed, iteration, particles.Length));
                     }
                 }
             }
         }
 
-        return new FitSolution(bestGlobalPositions, bestGlobalError, sw.Elapsed, iterations, particles.Length, intermediateSolutions?.ToArray());
+        return new FitSolution(bestGlobalPositions, bestGlobalError, sw.Elapsed, iterations, particles.Length);
     }
 }

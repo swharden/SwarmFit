@@ -51,10 +51,7 @@ public partial class Form1 : Form
 
     void Fit()
     {
-        SwarmFitter fitter = new(Xs, Ys, SelectedFunction.Function, SelectedFunction.TypicalParameterLimits)
-        {
-            StoreIntermediateSolutions = true
-        };
+        SwarmFitter fitter = new(Xs, Ys, SelectedFunction.Function, SelectedFunction.TypicalParameterLimits);
 
         FitSolution solution = fitter.Solve();
         label2.Text = $"Fit achieved in {solution.Elapsed.TotalMilliseconds:N2} msec " +

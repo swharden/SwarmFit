@@ -24,7 +24,7 @@ public class Animation
             new (-10, 10)
         ];
 
-        SwarmFitter fit = new(xs, ys, MyFunc, limits) { StoreIntermediateSolutions = true };
+        SwarmFitter fit = new(xs, ys, MyFunc, limits);
 
         FitSolution solution = fit.Solve();
 
@@ -46,6 +46,7 @@ public class Animation
         double[] fitXs = Generate.Range(plot.Axes.Bottom.Range.Min, plot.Axes.Bottom.Range.Max, plot.Axes.Bottom.Range.Span / 100);
         double[] fitYs = fitXs.Select(x => MyFunc(x, solution.Parameters)).ToArray();
 
+        /*
         if (solution.History is not null)
         {
             ScottPlot.Colormaps.Turbo cmap = new();
@@ -59,6 +60,7 @@ public class Animation
                 tempLine.LineWidth = 2;
             }
         }
+        */
 
         plot.SavePng("test.png", 400, 300).LaunchInBrowser();
 
@@ -84,7 +86,7 @@ public class Animation
             new (-10, 10)
         ];
 
-        SwarmFitter fit = new(xs, ys, MyFunc, limits) { StoreIntermediateSolutions = true };
+        SwarmFitter fit = new(xs, ys, MyFunc, limits);
 
         FitSolution solution = fit.Solve(400);
 
@@ -103,6 +105,7 @@ public class Animation
             Directory.Delete("animation", true);
         Directory.CreateDirectory("animation");
 
+        /*
         if (solution.History is not null)
         {
             double[] fitXs = Generate.Range(plot.Axes.Bottom.Range.Min, plot.Axes.Bottom.Range.Max, plot.Axes.Bottom.Range.Span / 100);
@@ -128,6 +131,7 @@ public class Animation
                 plot.SavePng($"animation/test-{i:0000}.png", 400, 300);
             }
         }
+        */
 
         Console.WriteLine(solution);
     }
