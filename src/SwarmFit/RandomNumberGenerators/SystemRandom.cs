@@ -1,6 +1,6 @@
 ﻿namespace SwarmFit.RandomNumberGenerators;
 
-internal class SystemRandom(bool randomSeed = false) : IRandomNumberGenerator
+public class SystemRandom(bool randomSeed = false) : IRandomNumberGenerator
 {
     private readonly Random Rand = new(randomSeed ? GetRandomSeed() : 0);
 

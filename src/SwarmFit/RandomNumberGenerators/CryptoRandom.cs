@@ -1,6 +1,6 @@
 ﻿namespace SwarmFit.RandomNumberGenerators;
 
-internal class CruptoRandom : IRandomNumberGenerator
+public class CruptoRandom : IRandomNumberGenerator
 {
     private readonly System.Security.Cryptography.RandomNumberGenerator Rand = System.Security.Cryptography.RandomNumberGenerator.Create();
 
