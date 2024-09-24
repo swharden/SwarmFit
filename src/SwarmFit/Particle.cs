@@ -21,7 +21,7 @@ public struct Particle
         BestError = bestErr;
     }
 
-    public readonly void RandomizePositions(Random rand, VariableLimits[] limits)
+    public readonly void RandomizePositions(IRandomNumberGenerator rand, VariableLimits[] limits)
     {
         double[] positions = Positions;
         for (int i = 0; i < positions.Length; i++)
