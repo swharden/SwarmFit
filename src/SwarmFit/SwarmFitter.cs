@@ -15,9 +15,7 @@ public class SwarmFitter
     public Func<double, double[], double> Function { get; }
     VariableLimits[] VarLimits { get; }
 
-    // Consider using seed-less constructor which picks faster implementation
-    // or providing a custom RNG - this is the hottest part of the algorithm.
-    public Random Rand = new(0); // TODO: make this settable
+    public IRandomNumberGenerator Rand { get; set; } = new RandomNumberGenerators.XorShift();
     public double VelocityRandomness = 0.1;
     public double InertiaWeight = 0.729;
     public double LocalWeight = 1.49445;
@@ -64,7 +62,6 @@ public class SwarmFitter
     public FitSolution Solve(int iterations = 1000)
     {
         Stopwatch sw = Stopwatch.StartNew();
-        Random rand = Rand;
 
         double[] bestGlobalPositions = new double[VariableCount];
         double bestGlobalError = double.MaxValue;
@@ -74,9 +71,9 @@ public class SwarmFitter
 
         for (int i = 0; i < particles.Length; i++)
         {
-            double[] randomPositions = VarLimits.Select(x => x.Random(rand)).ToArray();
+            double[] randomPositions = VarLimits.Select(x => x.Random(Rand)).ToArray();
             double error = GetError(randomPositions);
-            double[] randomVelocities = VarLimits.Select(x => x.Random(rand) * VelocityRandomness).ToArray();
+            double[] randomVelocities = VarLimits.Select(x => x.Random(Rand) * VelocityRandomness).ToArray();
             particles[i] = new Particle(randomPositions, error, randomVelocities, randomPositions, error);
 
             if (particles[i].Error < bestGlobalError)
@@ -102,8 +99,8 @@ public class SwarmFitter
                 for (int j = 0; j < velocities.Length; j++)
                 {
                     double inertia = InertiaWeight * velocities[j];
-                    double local = LocalWeight * rand.NextDouble() * (bestPositions[j] - positions[j]);
-                    double global = GlobalWeight * rand.NextDouble() * (bestGlobalPositions[j] - positions[j]);
+                    double local = LocalWeight * Rand.NextDouble() * (bestPositions[j] - positions[j]);
+                    double global = GlobalWeight * Rand.NextDouble() * (bestGlobalPositions[j] - positions[j]);
                     newVelocity[j] = inertia + local + global;
                 }
 
@@ -132,9 +129,10 @@ public class SwarmFitter
                     intermediateSolutions?.Add(new(bestGlobalPositions, bestGlobalError, sw.Elapsed, iteration, particles.Length));
                 }
 
-                if (rand.NextDouble() < probDeath)
+                // TODO: never kill the best performing particle. Maybe only kill the worst particle?
+                if (Rand.NextDouble() < probDeath)
                 {
-                    particle.RandomizePositions(rand, VarLimits);
+                    particle.RandomizePositions(Rand, VarLimits);
                     particle.Error = GetError(particle.Positions);
                     particle.BestError = particle.Error;
 
