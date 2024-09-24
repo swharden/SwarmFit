@@ -21,10 +21,20 @@ public class SwarmFitter
     public double LocalWeight = 1.49445;
     public double GlobalWeight = 1.49445;
     public double probDeath = 0.01;
-    public int NumParticles = 5;
+    public int NumParticles { get; }
+
+    private Particle[] Particles { get; }
+    double[] BestParameters { get; }
+    double BestError = double.MaxValue;
+    Stopwatch Stopwatch = new();
+    TimeSpan CalculationTime => Stopwatch.Elapsed;
+    int Improvements = 0;
+    int Iterations = 0;
+    FitSolution BestSolution => new(BestParameters, BestError, CalculationTime, Iterations, Improvements);
+
     public int ParameterCount => ParLimits.Length;
 
-    public SwarmFitter(double[] xs, double[] ys, Func<double, double[], double> func, ParameterLimits[] limits)
+    public SwarmFitter(double[] xs, double[] ys, Func<double, double[], double> func, ParameterLimits[] limits, int numParticles = 5)
     {
         if (xs.Length != ys.Length)
             throw new ArgumentException($"{nameof(xs)} and {nameof(ys)} must have equal length");
@@ -33,6 +43,9 @@ public class SwarmFitter
         Ys = ys;
         Function = func;
         ParLimits = limits;
+        NumParticles = numParticles;
+        Particles = new Particle[numParticles];
+        BestParameters = new double[ParameterCount];
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -56,35 +69,43 @@ public class SwarmFitter
     public double GetY(double x, double[] parameters) => Function(x, parameters);
     public double[] GetYs(double[] xs, double[] parameters) => xs.Select(x => GetY(x, parameters)).ToArray();
 
-    public FitSolution Solve(int iterations = 1000)
+    /// <summary>
+    /// Progress toward an ideal solution.
+    /// This method may be called multiple times.
+    /// </summary>
+    /// <param name="maxIterations">Stop trying to improve the fit once this number of particle progressions has been reached</param>
+    /// <param name="maxImprovements">Stop trying to improve the fit once parameter sets have been found this many times</param>
+    public FitSolution Solve(int maxIterations = 1000, int maxImprovements = 100)
     {
-        Stopwatch sw = Stopwatch.StartNew();
+        Stopwatch.Start();
 
-        double[] bestGlobalPositions = new double[ParameterCount];
-        double bestGlobalError = double.MaxValue;
-
-        Span<Particle> particles = new Particle[NumParticles];
-
-        for (int i = 0; i < particles.Length; i++)
+        if (BestError == double.MaxValue)
         {
-            double[] randomPositions = ParLimits.Select(x => x.Random(Rand)).ToArray();
-            double error = GetError(randomPositions);
-            double[] randomVelocities = ParLimits.Select(x => x.Random(Rand) * VelocityRandomness).ToArray();
-            particles[i] = new Particle(randomPositions, error, randomVelocities, randomPositions, error);
-
-            if (particles[i].Error < bestGlobalError)
+            // This is the first time running the solver so randomize everything and start from scratch.
+            // Otherwise, the solver can be run multiple times to get progressively closer to a solution.
+            for (int i = 0; i < Particles.Length; i++)
             {
-                bestGlobalError = particles[i].Error;
-                particles[i].Positions.AsSpan().CopyTo(bestGlobalPositions);
+                double[] randomPositions = ParLimits.Select(x => x.Random(Rand)).ToArray();
+                double error = GetError(randomPositions);
+                double[] randomVelocities = ParLimits.Select(x => x.Random(Rand) * VelocityRandomness).ToArray();
+                Particles[i] = new Particle(randomPositions, error, randomVelocities, randomPositions, error);
+
+                if (Particles[i].Error < BestError)
+                {
+                    BestError = Particles[i].Error;
+                    Particles[i].Positions.AsSpan().CopyTo(BestParameters);
+                }
             }
         }
 
         double[] newVelocity = new double[ParameterCount];
         double[] newPosition = new double[ParameterCount];
 
-        for (int iteration = 1; iteration <= iterations; iteration++)
+        int iterationLimit = maxIterations + Iterations;
+        int improvementLimit = maxImprovements + Improvements;
+        while (Iterations++ <= iterationLimit)
         {
-            foreach (ref Particle particle in particles)
+            foreach (Particle particle in Particles)
             {
                 double[] positions = particle.Positions;
                 double[] bestPositions = particle.BestPositions;
@@ -94,7 +115,7 @@ public class SwarmFitter
                 {
                     double inertia = InertiaWeight * velocities[j];
                     double local = LocalWeight * Rand.NextDouble() * (bestPositions[j] - positions[j]);
-                    double global = GlobalWeight * Rand.NextDouble() * (bestGlobalPositions[j] - positions[j]);
+                    double global = GlobalWeight * Rand.NextDouble() * (BestParameters[j] - positions[j]);
                     newVelocity[j] = inertia + local + global;
                 }
 
@@ -116,10 +137,15 @@ public class SwarmFitter
                     particle.BestError = newError;
                 }
 
-                if (newError < bestGlobalError)
+                if (newError < BestError)
                 {
-                    newPosition.AsSpan().CopyTo(bestGlobalPositions);
-                    bestGlobalError = newError;
+                    newPosition.AsSpan().CopyTo(BestParameters);
+                    BestError = newError;
+                    if (Improvements++ >= improvementLimit)
+                    {
+                        Stopwatch.Stop();
+                        return BestSolution;
+                    }
                 }
 
                 // TODO: never kill the best performing particle. Maybe only kill the worst particle?
@@ -129,15 +155,21 @@ public class SwarmFitter
                     particle.Error = GetError(particle.Positions);
                     particle.BestError = particle.Error;
 
-                    if (particle.Error < bestGlobalError)
+                    if (particle.Error < BestError)
                     {
-                        bestGlobalError = particle.Error;
-                        positions.AsSpan().CopyTo(bestGlobalPositions);
+                        BestError = particle.Error;
+                        positions.AsSpan().CopyTo(BestParameters);
+                        if (Improvements++ >= improvementLimit)
+                        {
+                            Stopwatch.Stop();
+                            return BestSolution;
+                        }
                     }
                 }
             }
         }
 
-        return new FitSolution(bestGlobalPositions, bestGlobalError, sw.Elapsed, iterations, particles.Length);
+        Stopwatch.Stop();
+        return BestSolution;
     }
 }

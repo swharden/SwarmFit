@@ -12,11 +12,11 @@ public static class QuickFit
     /// <param name="func">a user defined function which calculates Y given X according to a collection of parameters</param>
     /// <param name="parameterMins">minimum possible value for each parameter</param>
     /// <param name="parameterMaxes">maximum possible value for each parameter</param>
-    /// <param name="particles">Number of particles to use for fitting</param>
+    /// <param name="numParticles">Number of particles to use for fitting</param>
     /// <param name="iterations">Number of iterations to move each particle forward before returning the best solution identified</param>
     /// <returns></returns>
     /// <exception cref="ArgumentException"></exception>
-    public static double[] Solve(double[] xs, double[] ys, Func<double, double[], double> func, double[] parameterMins, double[] parameterMaxes, int particles = 100, int iterations = 10_000)
+    public static double[] Solve(double[] xs, double[] ys, Func<double, double[], double> func, double[] parameterMins, double[] parameterMaxes, int numParticles = 50, int maxIterations = 100_000, int maxImprovements = 100)
     {
         if (parameterMins.Length != parameterMaxes.Length)
         {
@@ -28,11 +28,8 @@ public static class QuickFit
             .Select(x => new ParameterLimits(parameterMins[x], parameterMaxes[x]))
             .ToArray();
 
-        SwarmFitter fit = new(xs, ys, func, limits)
-        {
-            NumParticles = particles
-        };
+        SwarmFitter fit = new(xs, ys, func, limits, numParticles);
 
-        return fit.Solve(iterations).Parameters;
+        return fit.Solve(maxIterations, maxImprovements).Parameters;
     }
 }
