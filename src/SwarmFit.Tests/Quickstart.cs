@@ -40,12 +40,16 @@ public class Quickstart
                111.096794, 94.25109, 81.55578, 71.30187,
                62.146603, 54.212032, 49.20715, 46.765743];
 
-        Func<double, double[], double> func = StandardFunctions.Exponential3P;
+        static double Exponential3P(double x, double[] parameters)
+        {
+            return parameters[0] * Math.Exp(parameters[1] * x) + parameters[2];
+        }
+
         ParameterLimits[] limits = [new(-5000, 5000), new(-100, 100), new(-100, 100)];
-        SwarmFitter fitter = new(xs, ys, func, limits);
+        SwarmFitter fitter = new(xs, ys, Exponential3P, limits);
         FitSolution solution = fitter.Solve(10_000);
 
-        double[] fitYs = xs.Select(x => func.Invoke(x, solution.Parameters)).ToArray();
+        double[] fitYs = xs.Select(x => Exponential3P(x, solution.Parameters)).ToArray();
 
         Plot plot = new();
         var data = plot.Add.Markers(xs, ys);
