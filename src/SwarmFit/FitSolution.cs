@@ -1,8 +1,8 @@
 ﻿namespace SwarmFit;
 
-public class FitSolution(double[] vars, double error, TimeSpan elapsed, int iterations, int particles, FitSolution[]? history = null)
+public class FitSolution(double[] parameters, double error, TimeSpan elapsed, int iterations, int particles, FitSolution[]? history = null)
 {
-    public double[] Variables { get; } = [.. vars];
+    public double[] Parameters { get; } = [.. parameters];
     public double Error { get; } = error;
     public FitSolution[]? History { get; } = history;
     public TimeSpan Elapsed { get; } = elapsed;
@@ -11,7 +11,7 @@ public class FitSolution(double[] vars, double error, TimeSpan elapsed, int iter
 
     public override string ToString()
     {
-        string vars = string.Join(", ", Variables.Select(x => x.ToString()));
-        return $"Solution [{vars}] achieved in {Elapsed.TotalMilliseconds} msec using {Particles} particles and {Iterations} iterations";
+        string parameters = string.Join(", ", Parameters.Select(x => x.ToString()));
+        return $"Solution [{parameters}] achieved in {Elapsed.TotalMilliseconds} msec using {Particles} particles and {Iterations} iterations";
     }
 };

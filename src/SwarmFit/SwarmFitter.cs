@@ -13,7 +13,7 @@ public class SwarmFitter
     public double[] Xs { get; }
     public double[] Ys { get; }
     public Func<double, double[], double> Function { get; }
-    VariableLimits[] VarLimits { get; }
+    ParameterLimits[] ParLimits { get; }
 
     public IRandomNumberGenerator Rand { get; set; } = new RandomNumberGenerators.XorShift();
     public double VelocityRandomness = 0.1;
@@ -22,11 +22,10 @@ public class SwarmFitter
     public double GlobalWeight = 1.49445;
     public double probDeath = 0.01;
     public int NumParticles = 5;
-    public bool SquareError = false;
-    public int VariableCount => VarLimits.Length;
+    public int ParameterCount => ParLimits.Length;
     public bool StoreIntermediateSolutions = false;
 
-    public SwarmFitter(double[] xs, double[] ys, Func<double, double[], double> func, VariableLimits[] limits)
+    public SwarmFitter(double[] xs, double[] ys, Func<double, double[], double> func, ParameterLimits[] limits)
     {
         if (xs.Length != ys.Length)
             throw new ArgumentException($"{nameof(xs)} and {nameof(ys)} must have equal length");
@@ -34,36 +33,35 @@ public class SwarmFitter
         Xs = xs;
         Ys = ys;
         Function = func;
-        VarLimits = limits;
+        ParLimits = limits;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    double GetError(double[] vars)
+    double GetError(double[] parameters)
     {
         double error = 0;
         double[] xs = Xs;
         double[] ys = Ys;
-        bool squareError = SquareError;
 
         for (int i = 0; i < xs.Length; i++)
         {
-            double predictedY = GetY(xs[i], vars);
+            double predictedY = GetY(xs[i], parameters);
             double actualY = ys[i];
             double diff = Math.Abs(predictedY - actualY);
-            error += squareError ? diff * diff : diff;
+            error += diff;
         }
 
         return error;
     }
 
-    public double GetY(double x, double[] vars) => Function(x, vars);
-    public double[] GetYs(double[] xs, double[] vars) => xs.Select(x => GetY(x, vars)).ToArray();
+    public double GetY(double x, double[] parameters) => Function(x, parameters);
+    public double[] GetYs(double[] xs, double[] parameters) => xs.Select(x => GetY(x, parameters)).ToArray();
 
     public FitSolution Solve(int iterations = 1000)
     {
         Stopwatch sw = Stopwatch.StartNew();
 
-        double[] bestGlobalPositions = new double[VariableCount];
+        double[] bestGlobalPositions = new double[ParameterCount];
         double bestGlobalError = double.MaxValue;
 
         Span<Particle> particles = new Particle[NumParticles];
@@ -71,9 +69,9 @@ public class SwarmFitter
 
         for (int i = 0; i < particles.Length; i++)
         {
-            double[] randomPositions = VarLimits.Select(x => x.Random(Rand)).ToArray();
+            double[] randomPositions = ParLimits.Select(x => x.Random(Rand)).ToArray();
             double error = GetError(randomPositions);
-            double[] randomVelocities = VarLimits.Select(x => x.Random(Rand) * VelocityRandomness).ToArray();
+            double[] randomVelocities = ParLimits.Select(x => x.Random(Rand) * VelocityRandomness).ToArray();
             particles[i] = new Particle(randomPositions, error, randomVelocities, randomPositions, error);
 
             if (particles[i].Error < bestGlobalError)
@@ -85,8 +83,8 @@ public class SwarmFitter
 
         intermediateSolutions?.Add(new(bestGlobalPositions, bestGlobalError, sw.Elapsed, 0, particles.Length));
 
-        double[] newVelocity = new double[VariableCount];
-        double[] newPosition = new double[VariableCount];
+        double[] newVelocity = new double[ParameterCount];
+        double[] newPosition = new double[ParameterCount];
 
         for (int iteration = 1; iteration <= iterations; iteration++)
         {
@@ -109,7 +107,7 @@ public class SwarmFitter
                 for (int j = 0; j < positions.Length; j++)
                 {
                     newPosition[j] = positions[j] + newVelocity[j];
-                    newPosition[j] = VarLimits[j].Clamp(newPosition[j]);
+                    newPosition[j] = ParLimits[j].Clamp(newPosition[j]);
                 }
                 newPosition.AsSpan().CopyTo(positions);
 
@@ -132,7 +130,7 @@ public class SwarmFitter
                 // TODO: never kill the best performing particle. Maybe only kill the worst particle?
                 if (Rand.NextDouble() < probDeath)
                 {
-                    particle.RandomizePositions(Rand, VarLimits);
+                    particle.RandomizePositions(Rand, ParLimits);
                     particle.Error = GetError(particle.Positions);
                     particle.BestError = particle.Error;
 

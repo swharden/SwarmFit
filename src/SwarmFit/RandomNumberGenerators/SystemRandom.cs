@@ -6,7 +6,7 @@ public class SystemRandom(bool randomSeed = false) : IRandomNumberGenerator
 
     private static int GetRandomSeed()
     {
-        var RNG = System.Security.Cryptography.RandomNumberGenerator.Create();
+        System.Security.Cryptography.RandomNumberGenerator RNG = System.Security.Cryptography.RandomNumberGenerator.Create();
         byte[] data = new byte[sizeof(int)];
         RNG.GetBytes(data);
         return BitConverter.ToInt32(data, 0) & (int.MaxValue - 1);

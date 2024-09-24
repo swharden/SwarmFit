@@ -2,7 +2,7 @@
 
 namespace SwarmFit;
 
-public readonly struct VariableLimits(double min, double max)
+public readonly struct ParameterLimits(double min, double max)
 {
     public double Min { get; } = Math.Min(min, max);
     public double Max { get; } = Math.Max(min, max);

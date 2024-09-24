@@ -10,22 +10,22 @@ public static class QuickFit
     /// <param name="xs">horizontal data values to fit</param>
     /// <param name="ys">vertical data values to fit</param>
     /// <param name="func">a user defined function which calculates Y given X according to a collection of parameters</param>
-    /// <param name="minVars">minimum possible value for each parameter</param>
-    /// <param name="maxVars">maximum possible value for each parameter</param>
+    /// <param name="parameterMins">minimum possible value for each parameter</param>
+    /// <param name="parameterMaxes">maximum possible value for each parameter</param>
     /// <param name="particles">Number of particles to use for fitting</param>
     /// <param name="iterations">Number of iterations to move each particle forward before returning the best solution identified</param>
     /// <returns></returns>
     /// <exception cref="ArgumentException"></exception>
-    public static double[] Solve(double[] xs, double[] ys, Func<double, double[], double> func, double[] minVars, double[] maxVars, int particles = 100, int iterations = 10_000)
+    public static double[] Solve(double[] xs, double[] ys, Func<double, double[], double> func, double[] parameterMins, double[] parameterMaxes, int particles = 100, int iterations = 10_000)
     {
-        if (minVars.Length != maxVars.Length)
+        if (parameterMins.Length != parameterMaxes.Length)
         {
-            throw new ArgumentException($"{nameof(minVars)} and {nameof(maxVars)} must have equal length");
+            throw new ArgumentException($"{nameof(parameterMins)} and {nameof(parameterMaxes)} must have equal length");
         }
 
-        VariableLimits[] limits = Enumerable
-            .Range(0, minVars.Length)
-            .Select(x => new VariableLimits(minVars[x], maxVars[x]))
+        ParameterLimits[] limits = Enumerable
+            .Range(0, parameterMins.Length)
+            .Select(x => new ParameterLimits(parameterMins[x], parameterMaxes[x]))
             .ToArray();
 
         SwarmFitter fit = new(xs, ys, func, limits)
@@ -33,6 +33,6 @@ public static class QuickFit
             NumParticles = particles
         };
 
-        return fit.Solve(iterations).Variables;
+        return fit.Solve(iterations).Parameters;
     }
 }

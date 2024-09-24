@@ -41,11 +41,11 @@ public class Quickstart
                62.146603, 54.212032, 49.20715, 46.765743];
 
         Func<double, double[], double> func = StandardFunctions.Exponential3P;
-        VariableLimits[] limits = [new(-5000, 5000), new(-100, 100), new(-100, 100)];
+        ParameterLimits[] limits = [new(-5000, 5000), new(-100, 100), new(-100, 100)];
         SwarmFitter fitter = new(xs, ys, func, limits);
         FitSolution solution = fitter.Solve(10_000);
 
-        double[] fitYs = xs.Select(x => func.Invoke(x, solution.Variables)).ToArray();
+        double[] fitYs = xs.Select(x => func.Invoke(x, solution.Parameters)).ToArray();
 
         Plot plot = new();
         var data = plot.Add.Markers(xs, ys);
@@ -59,7 +59,7 @@ public class Quickstart
 
         plot.Legend.Alignment = Alignment.UpperRight;
 
-        plot.Title($"Y = {solution.Variables[2]:0.00} + {solution.Variables[0]:0.00} * e^({solution.Variables[1]:0.00} * x)");
+        plot.Title($"Y = {solution.Parameters[2]:0.00} + {solution.Parameters[0]:0.00} * e^({solution.Parameters[1]:0.00} * x)");
         plot.Axes.Title.Label.Bold = false;
 
         var saved = plot.SavePng("test.png", 400, 300);
