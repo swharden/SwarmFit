@@ -13,21 +13,21 @@
 double[] xs = [1, 2, 3, 4, 5];
 double[] ys = [304, 229, 174, 134, 111];
 
-// define a fit function using any number of parameters
-static double MyFunc(double x, double[] parameters)
+// a custom function to fit to the data using any number of parameters
+static double MyFitFunc(double x, double[] parameters)
 {
 	double a = parameters[0];
 	double b = parameters[1];
 	double c = parameters[2];
-    return a + b * Math.Exp(x * c);
+	return a + b * Math.Exp(x * c);
 }
 
-// define the minimum and maximum value for each parameter
-double[] paramMins = [-100, -5000, -10];
-double[] paramMaxs = [100, 5000, 10];
+// the minimum and maximum value for each parameter
+double[] minVars = [-100, -5000, -10];
+double[] maxVars = [100, 5000, 10];
 
-// perform the fit
-double[] solution = QuickFit.Solve(xs, ys, MyFunc, minParams, maxParams);
+// perform the fit with general purpose settings
+double[] solution = QuickFit.Solve(xs, ys, MyFitFunc, minVars, maxVars);
 
 // display the solution
 double a = solution[0];
