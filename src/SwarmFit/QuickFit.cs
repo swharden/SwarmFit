@@ -4,7 +4,7 @@ public static class QuickFit
 {
     /// <summary>
     /// This function provides a simple API for fitting parameters of a function to find the best for for a collection of X/Y data points.
-    /// The fitter will attempt continue to optimize parameters until 1000 iterations yields no further improvement.
+    /// The fitter will attempt continue to optimize parameters until 500 iterations yields no further improvement.
     /// The swarm fitter has many configuration options which are not available when calling this function, so advanced users
     /// are encouraged to instantiate a <see cref="SwarmFitter"/> and interact it with directly to find the ideal solution.
     /// </summary>
@@ -17,7 +17,7 @@ public static class QuickFit
     /// <param name="maxIterations">Fitting will be aborted after this number of total iterations is performed</param>
     /// <returns>optimized parameters for the curve</returns>
     /// <exception cref="ArgumentException"></exception>
-    public static double[] Solve(double[] xs, double[] ys, Func<double, double[], double> func, double[] parameterMins, double[] parameterMaxes, int numParticles = 50, int maxIterations = 1_000_000)
+    public static double[] Solve(double[] xs, double[] ys, Func<double, double[], double> func, double[] parameterMins, double[] parameterMaxes, int numParticles = 10, int maxIterations = 10_000)
     {
         if (parameterMins.Length != parameterMaxes.Length)
         {
@@ -31,10 +31,10 @@ public static class QuickFit
 
         SwarmFitter fitter = new(xs, ys, func, limits, numParticles);
 
-        while(fitter.IterationCount < maxIterations)
+        while (fitter.IterationCount < maxIterations)
         {
             int originalImprovementCount = fitter.ImprovementCount;
-            FitSolution solution = fitter.Solve(maxIterations: 1000);
+            FitSolution solution = fitter.Solve(maxIterations: 500);
             if (fitter.ImprovementCount == originalImprovementCount)
                 break;
         }
