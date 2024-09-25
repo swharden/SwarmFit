@@ -4,7 +4,7 @@
 
 **SwarmFit is a .NET package for fitting curves to X/Y data** points using [particle swarm optimization](https://en.wikipedia.org/wiki/Particle_swarm_optimization). Unlike other gradient decent strategies, finding the derivative of the error function is not required. SwarmFit can be used to calculate best fit curves for arbitrary equations that use any number of parameters.
 
-![](dev/fit.gif)
+![](dev/fit2.gif)
 
 ## Quickstart
 
@@ -40,4 +40,4 @@ Console.WriteLine($"Y = {a} + {b} * e^(x * {c})");
 
 A sample application is included with this repository which generates random data and fits it using common curve functions. This application demonstrates advanced features such as fitter fine-tuning, iterative error logging, charting, etc.
 
-![](dev/example2.png)
+![](dev/example3.png)
