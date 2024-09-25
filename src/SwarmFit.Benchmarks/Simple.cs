@@ -7,29 +7,31 @@ namespace SwarmFit.Benchmarks;
 public class Simple
 {
     [Benchmark]
-    public (double a, double b, double c) SolveDemo()
+    public void SolveDemo()
     {
         // data points to fit
         double[] xs = [1, 2, 3, 4, 5];
         double[] ys = [304, 229, 174, 134, 111];
-        
-        static double Fit(double x, double[] vars)
+
+        // a custom function to fit to the data using any number of parameters
+        static double MyFitFunc(double x, double[] parameters)
         {
-            // Y = A + B * e^(x*C)
-            return vars[0] + vars[1] * Math.Exp(x * vars[2]);
+            double a = parameters[0];
+            double b = parameters[1];
+            double c = parameters[2];
+            return a + b * Math.Exp(x * c);
         }
 
-        // define the minimum and maximum value for each variable
+        // the minimum and maximum value for each parameter
         double[] minVars = [-100, -5000, -10];
         double[] maxVars = [100, 5000, 10];
 
-        // perform the fit
-        double[] solution = QuickFit.Solve(xs, ys, Fit, minVars, maxVars);
+        // perform the fit with general purpose settings
+        double[] solution = QuickFit.Solve(xs, ys, MyFitFunc, minVars, maxVars);
 
         // display the solution
         double a = solution[0];
         double b = solution[1];
         double c = solution[2];
-        return (a, b, c);
     }
 }
