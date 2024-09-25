@@ -19,9 +19,10 @@ public class KnownSolutions
 
         // Find a solution for the best parameters to fit the curve to the data points
         double[] solution = QuickFit.Solve(xs, ys, MyFunc, minVars, maxVars);
-        solution[0].Should().BeApproximately(parameters[0], .01);
-        solution[1].Should().BeApproximately(parameters[1], .01);
-        solution[2].Should().BeApproximately(parameters[2], .01);
+
+        solution[0].Should().BeApproximately(parameters[0], 1e-5);
+        solution[1].Should().BeApproximately(parameters[1], 1e-5);
+        solution[2].Should().BeApproximately(parameters[2], 1e-5);
 
         Plotting.PlotFit(xs, ys, MyFunc, solution).SavePng("Test_Fit_Values.png", 400, 300);
     }
