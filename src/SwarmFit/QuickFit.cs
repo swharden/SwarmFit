@@ -3,7 +3,8 @@
 public static class QuickFit
 {
     /// <summary>
-    /// This function provides a simple API for fitting paramaters of a function to find the best for for a collection of X/Y data points.
+    /// This function provides a simple API for fitting parameters of a function to find the best for for a collection of X/Y data points.
+    /// The fitter will attempt continue to optimize parameters until 1000 iterations yields no further improvement.
     /// The swarm fitter has many configuration options which are not available when calling this function, so advanced users
     /// are encouraged to instantiate a <see cref="SwarmFitter"/> and interact it with directly to find the ideal solution.
     /// </summary>
@@ -13,10 +14,10 @@ public static class QuickFit
     /// <param name="parameterMins">minimum possible value for each parameter</param>
     /// <param name="parameterMaxes">maximum possible value for each parameter</param>
     /// <param name="numParticles">Number of particles to use for fitting</param>
-    /// <param name="iterations">Number of iterations to move each particle forward before returning the best solution identified</param>
-    /// <returns></returns>
+    /// <param name="maxIterations">Fitting will be aborted after this number of total iterations is performed</param>
+    /// <returns>optimized parameters for the curve</returns>
     /// <exception cref="ArgumentException"></exception>
-    public static double[] Solve(double[] xs, double[] ys, Func<double, double[], double> func, double[] parameterMins, double[] parameterMaxes, int numParticles = 50, int maxIterations = 100_000, int maxImprovements = 100)
+    public static double[] Solve(double[] xs, double[] ys, Func<double, double[], double> func, double[] parameterMins, double[] parameterMaxes, int numParticles = 50, int maxIterations = 1_000_000)
     {
         if (parameterMins.Length != parameterMaxes.Length)
         {
@@ -28,8 +29,16 @@ public static class QuickFit
             .Select(x => new ParameterLimits(parameterMins[x], parameterMaxes[x]))
             .ToArray();
 
-        SwarmFitter fit = new(xs, ys, func, limits, numParticles);
+        SwarmFitter fitter = new(xs, ys, func, limits, numParticles);
 
-        return fit.Solve(maxIterations, maxImprovements).Parameters;
+        while(fitter.IterationCount < maxIterations)
+        {
+            int originalImprovementCount = fitter.ImprovementCount;
+            FitSolution solution = fitter.Solve(maxIterations: 1000);
+            if (fitter.ImprovementCount == originalImprovementCount)
+                break;
+        }
+
+        return fitter.BestSolution.Parameters;
     }
 }

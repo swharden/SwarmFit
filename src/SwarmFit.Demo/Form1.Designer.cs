@@ -35,15 +35,18 @@ partial class Form1
         btnStep = new Button();
         btnSolve = new Button();
         richTextBox1 = new RichTextBox();
+        btnImprove = new Button();
+        btnZeroError = new Button();
+        btnImproveStop = new Button();
         SuspendLayout();
         // 
         // formsPlot1
         // 
         formsPlot1.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
         formsPlot1.DisplayScale = 1F;
-        formsPlot1.Location = new Point(12, 119);
+        formsPlot1.Location = new Point(12, 166);
         formsPlot1.Name = "formsPlot1";
-        formsPlot1.Size = new Size(725, 468);
+        formsPlot1.Size = new Size(804, 421);
         formsPlot1.TabIndex = 8;
         // 
         // comboFormula
@@ -53,7 +56,7 @@ partial class Form1
         comboFormula.FormattingEnabled = true;
         comboFormula.Location = new Point(12, 12);
         comboFormula.Name = "comboFormula";
-        comboFormula.Size = new Size(725, 23);
+        comboFormula.Size = new Size(804, 23);
         comboFormula.TabIndex = 9;
         // 
         // btnRandomize
@@ -81,7 +84,7 @@ partial class Form1
         btnStep.Name = "btnStep";
         btnStep.Size = new Size(97, 41);
         btnStep.TabIndex = 15;
-        btnStep.Text = "Step";
+        btnStep.Text = "Iterate Once";
         btnStep.UseVisualStyleBackColor = true;
         // 
         // btnSolve
@@ -90,7 +93,7 @@ partial class Form1
         btnSolve.Name = "btnSolve";
         btnSolve.Size = new Size(97, 41);
         btnSolve.TabIndex = 16;
-        btnSolve.Text = "Solve";
+        btnSolve.Text = "Iterate 100 Times";
         btnSolve.UseVisualStyleBackColor = true;
         // 
         // richTextBox1
@@ -98,18 +101,48 @@ partial class Form1
         richTextBox1.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
         richTextBox1.BackColor = SystemColors.Control;
         richTextBox1.BorderStyle = BorderStyle.None;
-        richTextBox1.Location = new Point(383, 41);
+        richTextBox1.Location = new Point(12, 88);
         richTextBox1.Name = "richTextBox1";
         richTextBox1.ReadOnly = true;
-        richTextBox1.Size = new Size(354, 72);
+        richTextBox1.Size = new Size(804, 72);
         richTextBox1.TabIndex = 17;
         richTextBox1.Text = "";
+        // 
+        // btnImprove
+        // 
+        btnImprove.Location = new Point(383, 41);
+        btnImprove.Name = "btnImprove";
+        btnImprove.Size = new Size(97, 41);
+        btnImprove.TabIndex = 18;
+        btnImprove.Text = "Iterate Until Improved";
+        btnImprove.UseVisualStyleBackColor = true;
+        // 
+        // btnZeroError
+        // 
+        btnZeroError.Location = new Point(486, 42);
+        btnZeroError.Name = "btnZeroError";
+        btnZeroError.Size = new Size(97, 41);
+        btnZeroError.TabIndex = 19;
+        btnZeroError.Text = "Iterate Until Zero Error";
+        btnZeroError.UseVisualStyleBackColor = true;
+        // 
+        // button1
+        // 
+        btnImproveStop.Location = new Point(589, 42);
+        btnImproveStop.Name = "button1";
+        btnImproveStop.Size = new Size(129, 41);
+        btnImproveStop.TabIndex = 20;
+        btnImproveStop.Text = "Iterate Until Improvements Stop";
+        btnImproveStop.UseVisualStyleBackColor = true;
         // 
         // Form1
         // 
         AutoScaleDimensions = new SizeF(7F, 15F);
         AutoScaleMode = AutoScaleMode.Font;
-        ClientSize = new Size(749, 599);
+        ClientSize = new Size(828, 599);
+        Controls.Add(btnImproveStop);
+        Controls.Add(btnZeroError);
+        Controls.Add(btnImprove);
         Controls.Add(richTextBox1);
         Controls.Add(btnSolve);
         Controls.Add(btnStep);
@@ -132,4 +165,7 @@ partial class Form1
     private Button btnStep;
     private Button btnSolve;
     private RichTextBox richTextBox1;
+    private Button btnImprove;
+    private Button btnZeroError;
+    private Button btnImproveStop;
 }
